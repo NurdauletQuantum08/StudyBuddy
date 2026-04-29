@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyBuddy — учимся вместе</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Onest:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14; --surface: #151820; --card: #1c202c; --border: #2a2f42;
+    --accent: #6c63ff; --accent2: #ff6584; --accent3: #43e97b;
+    --text: #e8eaf0; --muted: #7a7f96; --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Onest', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+  /* NAV */
+  nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 18px 32px; background: rgba(13,15,20,.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+  .logo { font-family: 'Unbounded', sans-serif; font-size: 1.3rem; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .nav-links { display: flex; gap: 8px; }
+  .nav-btn { padding: 8px 18px; border-radius: 999px; border: none; font-family: 'Onest', sans-serif; font-size: .85rem; font-weight: 500; cursor: pointer; transition: all .2s; }
+  .nav-btn.ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .nav-btn.ghost:hover { color: var(--text); border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #fff; }
+  .nav-btn.primary:hover { opacity: .85; transform: translateY(-1px); }
+
+  /* HERO */
+  .hero { text-align: center; padding: 100px 24px 80px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -120px; left: 50%; transform: translateX(-50%); width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(108,99,255,.18) 0%, transparent 70%); pointer-events: none; }
+  .hero h1 { font-family: 'Unbounded', sans-serif; font-size: clamp(2rem,6vw,4rem); font-weight: 800; line-height: 1.15; margin-bottom: 20px; }
+  .hero h1 span { color: var(--accent); }
+  .hero p { font-size: 1.1rem; color: var(--muted); max-width: 520px; margin: 0 auto 36px; }
+  .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn { padding: 14px 28px; border-radius: 999px; border: none; font-family: 'Onest', sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all .25s; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(108,99,255,.4); }
+  .btn-outline { background: transparent; color: var(--text); border: 1.5px solid var(--border); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* STATS */
+  .stats { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; padding: 0 24px 64px; }
+  .stat { text-align: center; }
+  .stat-num { font-family: 'Unbounded', sans-serif; font-size: 2rem; font-weight: 800; color: var(--accent); }
+  .stat-label { font-size: .85rem; color: var(--muted); margin-top: 4px; }
+
+  /* SECTIONS */
+  .section { padding: 64px 24px; max-width: 1100px; margin: 0 auto; }
+  .section-title { font-family: 'Unbounded', sans-serif; font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; }
+  .section-sub { color: var(--muted); margin-bottom: 36px; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 8px; margin-bottom: 32px; flex-wrap: wrap; }
+  .tab { padding: 8px 20px; border-radius: 999px; border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-family: 'Onest', sans-serif; font-size: .9rem; cursor: pointer; transition: all .2s; }
+  .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tab:hover:not(.active) { border-color: var(--accent); color: var(--text); }
+
+  /* CARDS */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; transition: all .25s; cursor: pointer; position: relative; overflow: hidden; }
+  .card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(108,99,255,.07), transparent); opacity: 0; transition: opacity .25s; }
+  .card:hover { transform: translateY(-4px); border-color: var(--accent); }
+  .card:hover::after { opacity: 1; }
+  .card-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .avatar { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+  .card-name { font-weight: 600; font-size: 1rem; }
+  .card-class { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: .75rem; font-weight: 500; background: rgba(108,99,255,.15); color: var(--accent); margin: 2px; }
+  .badge.green { background: rgba(67,233,123,.12); color: var(--accent3); }
+  .subjects { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
+  .rating { display: flex; align-items: center; gap: 6px; font-size: .85rem; color: var(--muted); }
+  .stars { color: #f5c518; }
+  .schedule-mini { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 14px; }
+  .schedule-mini-title { font-size: .75rem; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .08em; }
+  .slots { display: flex; gap: 6px; flex-wrap: wrap; }
+  .slot { padding: 4px 10px; border-radius: 8px; border: 1px solid var(--border); font-size: .78rem; color: var(--text); cursor: pointer; transition: all .15s; }
+  .slot:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .book-btn { width: 100%; margin-top: 14px; padding: 10px; border-radius: 10px; border: none; background: var(--accent); color: #fff; font-family: 'Onest', sans-serif; font-size: .9rem; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .book-btn:hover { opacity: .85; }
+
+  /* MODAL */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity .25s; }
+  .overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 36px; width: 100%; max-width: 480px; transform: translateY(30px); transition: transform .3s; max-height: 90vh; overflow-y: auto; }
+  .overlay.open .modal { transform: translateY(0); }
+  .modal h2 { font-family: 'Unbounded', sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 24px; }
+  .form-group { margin-bottom: 18px; }
+  label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 6px; }
+  input, textarea, select { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); font-family: 'Onest', sans-serif; font-size: .95rem; outline: none; transition: border-color .2s; }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  select option { background: var(--surface); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-btns { display: flex; gap: 10px; margin-top: 24px; }
+  .modal-btns .btn { flex: 1; padding: 13px; }
+  .close-btn { position: absolute; top: 20px; right: 24px; background: none; border: none; color: var(--muted); font-size: 1.4rem; cursor: pointer; }
+  .close-btn:hover { color: var(--text); }
+
+  /* SCHEDULE TABLE */
+  .sched-table { width: 100%; border-collapse: collapse; }
+  .sched-table th, .sched-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); font-size: .9rem; }
+  .sched-table th { color: var(--muted); font-weight: 500; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
+  .sched-table tr:hover td { background: rgba(108,99,255,.05); }
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .dot-free { background: var(--accent3); }
+  .dot-busy { background: var(--accent2); }
+
+  /* PROFILE */
+  .profile-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; display: flex; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+  .profile-avatar { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--accent3)); flex-shrink: 0; }
+  .profile-info h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
+  .profile-info p { color: var(--muted); font-size: .9rem; }
+  .profile-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+  /* WEEK PICKER */
+  .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 24px; }
+  .day-cell { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 6px; text-align: center; cursor: pointer; transition: all .2s; }
+  .day-cell.active { border-color: var(--accent); background: rgba(108,99,255,.12); }
+  .day-name { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .day-num { font-size: 1.1rem; font-weight: 700; margin-top: 4px; }
+  .time-slots-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .time-toggle { padding: 10px; border-radius: 10px; text-align: center; border: 1.5px solid var(--border); font-size: .85rem; cursor: pointer; transition: all .2s; user-select: none; }
+  .time-toggle.on { background: rgba(67,233,123,.12); border-color: var(--accent3); color: var(--accent3); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 30px; right: 30px; z-index: 999; background: var(--accent); color: #fff; padding: 14px 24px; border-radius: 12px; font-weight: 600; font-size: .9rem; transform: translateY(80px); opacity: 0; transition: all .35s cubic-bezier(.22,1,.36,1); pointer-events: none; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  footer { text-align: center; padding: 40px 24px; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--border); margin-top: 80px; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  @media (max-width: 600px) {
+    nav { padding: 14px 18px; }
+    .hero { padding: 70px 18px 50px; }
+    .stats { gap: 24px; }
+    .week-grid { gap: 4px; }
+    .day-cell { padding: 8px 2px; }
+    .day-num { font-size: .95rem; }
+    .time-slots-grid { grid-template-columns: repeat(3, 1fr); }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">StudyBuddy</div>
+  <div class="nav-links" id="navLinks">
+    <button class="nav-btn ghost" onclick="showPage('home')">Главная</button>
+    <button class="nav-btn ghost" onclick="showPage('tutors')">Тьюторы</button>
+    <button class="nav-btn ghost" onclick="showPage('schedule')">Расписание</button>
+    <button class="nav-btn primary" onclick="openModal('authModal')" id="authNavBtn">Войти</button>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div class="page active" id="homePage">
+  <section class="hero">
+    <h1>Учимся вместе,<br><span>растём вместе</span></h1>
+    <p>Платформа, где ученики помогают друг другу. Найди тьютора из своей школы или стань им сам.</p>
+    <div class="hero-btns">
+      <button class="btn btn-primary" onclick="showPage('tutors')">Найти тьютора</button>
+      <button class="btn btn-outline" onclick="openModal('registerModal')">Стать тьютором</button>
+    </div>
+  </section>
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="statTutors">—</div><div class="stat-label">Активных тьюторов</div></div>
+    <div class="stat"><div class="stat-num" id="statSessions">—</div><div class="stat-label">Сессий проведено</div></div>
+    <div class="stat"><div class="stat-num" id="statSubjects">—</div><div class="stat-label">Предметов</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Бесплатно</div></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Как это работает</div>
+    <div class="section-sub">Три простых шага</div>
+    <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr))">
+      <div class="card" style="cursor:default"><div style="font-size:2.5rem;margin-bottom:16px">🔍</div><div class="card-name" style="margin-bottom:8px">Найди тьютора</div><div style="color:var(--muted);font-size:.9rem">Выбери предмет, найди ученика который разбирается лучше тебя.</div></div>
+      <div class="card" style="cursor:default"><div style="font-size:2.5rem;margin-bottom:16px">📅</div><div class="card-name" style="margin-bottom:8px">Запишись на сессию</div><div style="color:var(--muted);font-size:.9rem">Выбери удобный слот в расписании и забронируй его одним нажатием.</div></div>
+      <div class="card" style="cursor:default"><div style="font-size:2.5rem;margin-bottom:16px">🎓</div><div class="card-name" style="margin-bottom:8px">Учись и помогай</div><div style="color:var(--muted);font-size:.9rem">После сессии ты сам можешь стать тьютором и делиться знаниями.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TUTORS PAGE -->
+<div class="page" id="tutorsPage">
+  <div class="section">
+    <div class="section-title">Тьюторы</div>
+    <div class="section-sub">Ученики, которые готовы помочь</div>
+    <div class="tabs" id="subjectTabs">
+      <button class="tab active" onclick="filterTutors('all', this)">Все</button>
+      <button class="tab" onclick="filterTutors('Математика', this)">Математика</button>
+      <button class="tab" onclick="filterTutors('Физика', this)">Физика</button>
+      <button class="tab" onclick="filterTutors('Химия', this)">Химия</button>
+      <button class="tab" onclick="filterTutors('Биология', this)">Биология</button>
+      <button class="tab" onclick="filterTutors('История', this)">История</button>
+      <button class="tab" onclick="filterTutors('Английский', this)">Английский</button>
+    </div>
+    <div class="grid" id="tutorsGrid"></div>
+  </div>
+</div>
+
+<!-- SCHEDULE PAGE -->
+<div class="page" id="schedulePage">
+  <div class="section">
+    <div class="section-title">Расписание</div>
+    <div class="section-sub">Все запланированные сессии на этой неделе</div>
+    <div id="scheduleContent"></div>
+  </div>
+</div>
+
+<!-- PROFILE PAGE -->
+<div class="page" id="profilePage">
+  <div class="section">
+    <div class="section-title">Мой профиль</div>
+    <div class="section-sub">Управляй своим расписанием тьютора</div>
+    <div class="profile-card" id="profileCard"></div>
+    <div style="margin-top:36px">
+      <div class="section-title" style="font-size:1.2rem;margin-bottom:8px">Моё расписание тьютора</div>
+      <p style="color:var(--muted);font-size:.9rem;margin-bottom:24px">Выбери дни и время, когда ты доступен</p>
+      <div class="week-grid" id="weekGrid"></div>
+      <div class="time-slots-grid" id="timeSlotsGrid"></div>
+      <button class="btn btn-primary" style="margin-top:20px" onclick="saveSchedule()">Сохранить расписание</button>
+    </div>
+    <div style="margin-top:48px">
+      <div class="section-title" style="font-size:1.2rem;margin-bottom:20px">Мои записи</div>
+      <div id="myBookings"></div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="overlay" id="authModal" onclick="closeOnOverlay(event,'authModal')">
+  <div class="modal" style="position:relative">
+    <button class="close-btn" onclick="closeModal('authModal')">✕</button>
+    <h2>Войти</h2>
+    <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="твой@email.kz"></div>
+    <div class="form-group"><label>Пароль</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+    <div class="modal-btns">
+      <button class="btn btn-primary" onclick="login()">Войти</button>
+      <button class="btn btn-outline" onclick="closeModal('authModal');openModal('registerModal')">Регистрация</button>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER MODAL -->
+<div class="overlay" id="registerModal" onclick="closeOnOverlay(event,'registerModal')">
+  <div class="modal" style="position:relative">
+    <button class="close-btn" onclick="closeModal('registerModal')">✕</button>
+    <h2>Регистрация</h2>
+    <div class="form-row">
+      <div class="form-group"><label>Имя</label><input id="regName" placeholder="Алия"></div>
+      <div class="form-group"><label>Фамилия</label><input id="regSurname" placeholder="Иванова"></div>
+    </div>
+    <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="твой@email.kz"></div>
+    <div class="form-group"><label>Класс</label>
+      <select id="regClass">
+        <option>7 класс</option><option>8 класс</option><option>9 класс</option>
+        <option>10 класс</option><option>11 класс</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Пароль</label><input type="password" id="regPass" placeholder="••••••••"></div>
+    <div class="form-group" style="display:flex;align-items:center;gap:10px">
+      <input type="checkbox" id="regAsTutor" style="width:auto">
+      <label for="regAsTutor" style="margin:0;color:var(--text)">Хочу стать тьютором</label>
+    </div>
+    <div id="tutorFields" style="display:none">
+      <div class="form-group"><label>Предметы (через запятую)</label><input id="regSubjects" placeholder="Математика, Физика"></div>
+      <div class="form-group"><label>О себе</label><textarea id="regBio" rows="2" placeholder="Кратко о своём опыте..."></textarea></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-primary" onclick="register()">Зарегистрироваться</button>
+      <button class="btn btn-outline" onclick="closeModal('registerModal');openModal('authModal')">Уже есть аккаунт</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOOK MODAL -->
+<div class="overlay" id="bookModal" onclick="closeOnOverlay(event,'bookModal')">
+  <div class="modal" style="position:relative">
+    <button class="close-btn" onclick="closeModal('bookModal')">✕</button>
+    <h2 id="bookModalTitle">Записаться</h2>
+    <p id="bookModalSub" style="color:var(--muted);margin-bottom:20px;font-size:.9rem"></p>
+    <div class="form-group"><label>День</label><select id="bookDay" onchange="updateBookTimes()"></select></div>
+    <div class="form-group"><label>Время</label><select id="bookTime"></select></div>
+    <div class="form-group"><label>Предмет</label><select id="bookSubject"></select></div>
+    <div class="form-group"><label>Комментарий (необязательно)</label><textarea id="bookComment" rows="2" placeholder="Что именно разобрать?"></textarea></div>
+    <div class="modal-btns">
+      <button class="btn btn-primary" onclick="confirmBooking()">Записаться</button>
+      <button class="btn btn-outline" onclick="closeModal('bookModal')">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<footer>© 2024 StudyBuddy — учимся вместе 💜</footer>
+
+<script>
+const DAYS  = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+const TIMES = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
+
+let currentUser    = null;
+let activeFilter   = 'all';
+let bookingTutorId = null;
+let tutorsCache    = [];
+let bookingsCache  = {};   // { tutorId_day_time: true }
+
+let selectedDays  = new Set();
+let selectedTimes = new Set();
+
+// ── INIT ──
+async function init() {
+  await loadMe();
+  loadStats();
+  updateNav();
+}
+
+async function loadMe() {
+  const res  = await fetch('/api/me');
+  const data = await res.json();
+  currentUser = data.user;
+}
+
+async function loadStats() {
+  const res  = await fetch('/api/stats');
+  const data = await res.json();
+  document.getElementById('statTutors').textContent   = data.tutors;
+  document.getElementById('statSessions').textContent = data.sessions;
+  document.getElementById('statSubjects').textContent = data.subjects;
+}
+
+// ── PAGES ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const map = { home:'homePage', tutors:'tutorsPage', schedule:'schedulePage', profile:'profilePage' };
+  document.getElementById(map[name]).classList.add('active');
+  if (name === 'tutors')   loadTutors();
+  if (name === 'schedule') loadSchedule();
+  if (name === 'profile')  renderProfile();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ── MODALS ──
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeOnOverlay(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+
+// ── AUTH ──
+document.getElementById('regAsTutor').addEventListener('change', function() {
+  document.getElementById('tutorFields').style.display = this.checked ? 'block' : 'none';
+});
+
+async function register() {
+  const payload = {
+    name:     document.getElementById('regName').value.trim(),
+    surname:  document.getElementById('regSurname').value.trim(),
+    email:    document.getElementById('regEmail').value.trim(),
+    password: document.getElementById('regPass').value,
+    grade:    document.getElementById('regClass').value,
+    is_tutor: document.getElementById('regAsTutor').checked,
+    subjects: document.getElementById('regSubjects').value,
+    bio:      document.getElementById('regBio').value,
+  };
+  const res  = await fetch('/api/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+  const data = await res.json();
+  if (data.error) return toast(data.error);
+  currentUser = data.user;
+  currentUser.subjects = (currentUser.subjects || '').split(',').map(s=>s.trim()).filter(Boolean);
+  closeModal('registerModal');
+  updateNav();
+  toast(`Добро пожаловать, ${currentUser.name}! 🎉`);
+  showPage('profile');
+}
+
+async function login() {
+  const payload = { email: document.getElementById('loginEmail').value.trim(), password: document.getElementById('loginPass').value };
+  const res  = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+  const data = await res.json();
+  if (data.error) return toast(data.error);
+  currentUser = data.user;
+  currentUser.subjects = (currentUser.subjects || '').split(',').map(s=>s.trim()).filter(Boolean);
+  closeModal('authModal');
+  updateNav();
+  toast(`Привет, ${currentUser.name}! 👋`);
+  showPage('profile');
+}
+
+async function logout() {
+  await fetch('/api/logout', { method:'POST' });
+  currentUser = null;
+  updateNav();
+  showPage('home');
+  toast('Вы вышли из аккаунта');
+}
+
+function updateNav() {
+  const btn = document.getElementById('authNavBtn');
+  let lo = document.getElementById('logoutBtn');
+  if (currentUser) {
+    btn.textContent = currentUser.name;
+    btn.onclick = () => showPage('profile');
+    if (!lo) {
+      lo = document.createElement('button');
+      lo.id = 'logoutBtn'; lo.className = 'nav-btn ghost';
+      lo.textContent = 'Выйти'; lo.onclick = logout;
+      document.getElementById('navLinks').appendChild(lo);
+    }
+  } else {
+    btn.textContent = 'Войти';
+    btn.onclick = () => openModal('authModal');
+    if (lo) lo.remove();
+  }
+}
+
+// ── TUTORS ──
+async function loadTutors() {
+  const res  = await fetch(`/api/tutors?subject=${activeFilter}`);
+  const data = await res.json();
+  tutorsCache = data.tutors;
+  renderTutors(data.tutors);
+}
+
+function filterTutors(subject, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  activeFilter = subject;
+  loadTutors();
+}
+
+function renderTutors(tutors) {
+  const grid = document.getElementById('tutorsGrid');
+  if (!tutors.length) { grid.innerHTML = '<p style="color:var(--muted)">Нет тьюторов по этому предмету.</p>'; return; }
+  grid.innerHTML = tutors.map(t => {
+    const days     = Object.entries(t.schedule || {});
+    const slotHTML = days.length
+      ? days.slice(0,2).map(([day, times]) =>
+          `<div class="slot" onclick="openBooking(${t.id})">${day}: ${times.slice(0,2).join(', ')}${times.length>2?'...':''}</div>`
+        ).join('')
+      : '<div style="color:var(--muted);font-size:.8rem">Расписание не указано</div>';
+    return `
+    <div class="card">
+      <div class="card-head">
+        <div class="avatar">${t.emoji}</div>
+        <div><div class="card-name">${t.name} ${t.surname}</div><div class="card-class">${t.grade} • ${t.sessions} сессий</div></div>
+      </div>
+      <div class="subjects">${(t.subjects||[]).map(s=>`<span class="badge">${s}</span>`).join('')}</div>
+      <div style="font-size:.85rem;color:var(--muted);margin-bottom:10px">${t.bio||''}</div>
+      <div class="rating"><span class="stars">★★★★★</span>${t.rating}</div>
+      <div class="schedule-mini">
+        <div class="schedule-mini-title">Ближайшие слоты</div>
+        <div class="slots">${slotHTML}</div>
+      </div>
+      <button class="book-btn" onclick="openBooking(${t.id})">Записаться</button>
+    </div>`;
+  }).join('');
+}
+
+// ── BOOKING ──
+async function openBooking(tutorId) {
+  if (!currentUser) { openModal('authModal'); return; }
+  const tutor = tutorsCache.find(t => t.id === tutorId);
+  bookingTutorId = tutorId;
+  document.getElementById('bookModalTitle').textContent = `Записаться к ${tutor.name}`;
+  document.getElementById('bookModalSub').textContent   = `${tutor.grade} • ${(tutor.subjects||[]).join(', ')}`;
+
+  // Дни
+  const dayEl = document.getElementById('bookDay');
+  dayEl.innerHTML = '';
+  const days = Object.keys(tutor.schedule || {});
+  (days.length ? days : DAYS).forEach(d => {
+    const o = document.createElement('option'); o.value = d; o.textContent = d; dayEl.appendChild(o);
+  });
+
+  // Загружаем занятые слоты
+  const bRes = await fetch('/api/schedule/all');
+  const bData = await bRes.json();
+  bookingsCache = {};
+  bData.slots.forEach(s => { if (s.booking_id) bookingsCache[`${s.tutor_id}_${s.day}_${s.time}`] = true; });
+
+  updateBookTimes(tutor);
+  dayEl.onchange = () => updateBookTimes(tutor);
+
+  // Предметы
+  const subEl = document.getElementById('bookSubject');
+  subEl.innerHTML = (tutor.subjects||[]).map(s=>`<option>${s}</option>`).join('');
+  openModal('bookModal');
+}
+
+function updateBookTimes(tutor) {
+  if (!tutor) tutor = tutorsCache.find(t => t.id === bookingTutorId);
+  const day    = document.getElementById('bookDay').value;
+  const timeEl = document.getElementById('bookTime');
+  const available = (tutor.schedule && tutor.schedule[day]) ? tutor.schedule[day] : TIMES.slice(0,5);
+  timeEl.innerHTML = available.map(tm => {
+    const taken = bookingsCache[`${tutor.id}_${day}_${tm}`];
+    return `<option ${taken?'disabled':''} value="${tm}">${tm}${taken?' (занято)':''}</option>`;
+  }).join('');
+}
+
+async function confirmBooking() {
+  const payload = {
+    tutor_id: bookingTutorId,
+    day:      document.getElementById('bookDay').value,
+    time:     document.getElementById('bookTime').value,
+    subject:  document.getElementById('bookSubject').value,
+    comment:  document.getElementById('bookComment').value,
+  };
+  if (!payload.time) return toast('Выбери время!');
+  const res  = await fetch('/api/book', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+  const data = await res.json();
+  if (data.error) return toast(data.error);
+  closeModal('bookModal');
+  const tutor = tutorsCache.find(t => t.id === bookingTutorId);
+  toast(`Записано! ${payload.day} в ${payload.time} с ${tutor.name} 🎉`);
+  loadStats();
+  loadTutors();
+}
+
+// ── SCHEDULE ──
+async function loadSchedule() {
+  const res  = await fetch('/api/schedule/all');
+  const data = await res.json();
+  const el   = document.getElementById('scheduleContent');
+  if (!data.slots.length) { el.innerHTML = '<p style="color:var(--muted)">Пока нет расписания</p>'; return; }
+
+  const dayOrder = {Пн:0,Вт:1,Ср:2,Чт:3,Пт:4,Сб:5,Вс:6};
+  data.slots.sort((a,b) => (dayOrder[a.day]??9)-(dayOrder[b.day]??9) || a.time.localeCompare(b.time));
+
+  el.innerHTML = `
+  <table class="sched-table">
+    <thead><tr><th>День</th><th>Время</th><th>Тьютор</th><th>Предмет</th><th>Статус</th></tr></thead>
+    <tbody>
+    ${data.slots.map(s => `
+      <tr>
+        <td>${s.day}</td><td>${s.time}</td>
+        <td>${s.name} ${s.surname}</td>
+        <td>${(s.subjects||[]).join(', ')}</td>
+        <td>${s.booking_id
+          ? `<span class="status-dot dot-busy"></span>${s.student_name}`
+          : `<span class="status-dot dot-free"></span><span style="cursor:pointer;color:var(--accent)" onclick="openBooking(${s.tutor_id})">Свободно</span>`
+        }</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+// ── PROFILE ──
+async function renderProfile() {
+  if (!currentUser) { showPage('home'); openModal('authModal'); return; }
+
+  // Обновим данные
+  const res  = await fetch('/api/me');
+  const data = await res.json();
+  if (data.user) currentUser = data.user;
+  const u = currentUser;
+
+  document.getElementById('profileCard').innerHTML = `
+    <div class="profile-avatar">${u.emoji}</div>
+    <div class="profile-info">
+      <h3>${u.name} ${u.surname}</h3>
+      <p>${u.grade} • ${u.email}</p>
+      <div class="profile-badges">
+        ${u.is_tutor ? `<span class="badge green">🎓 Тьютор</span>` : '<span class="badge">Ученик</span>'}
+        ${(u.subjects||[]).map(s=>`<span class="badge">${s}</span>`).join('')}
+      </div>
+      ${!u.is_tutor ? `<button class="btn btn-primary" style="margin-top:16px;padding:10px 20px;font-size:.85rem" onclick="becomeTutor()">Стать тьютором</button>` : ''}
+    </div>`;
+
+  // Week grid
+  const today    = new Date();
+  const weekGrid = document.getElementById('weekGrid');
+  // Инициализируем selectedDays из текущего расписания
+  if (u.schedule && Object.keys(u.schedule).length && selectedDays.size === 0) {
+    selectedDays  = new Set(Object.keys(u.schedule));
+    selectedTimes = new Set(Object.values(u.schedule).flat());
+  }
+  weekGrid.innerHTML = DAYS.map((d,i) => {
+    const date = new Date(today); date.setDate(today.getDate() - today.getDay() + i + 1);
+    return `<div class="day-cell ${selectedDays.has(d)?'active':''}" onclick="toggleDay('${d}',this)">
+      <div class="day-name">${d}</div><div class="day-num">${date.getDate()}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('timeSlotsGrid').innerHTML = TIMES.map(t =>
+    `<div class="time-toggle ${selectedTimes.has(t)?'on':''}" onclick="toggleTime('${t}',this)">${t}</div>`
+  ).join('');
+
+  renderMyBookings();
+}
+
+function toggleDay(d, el) {
+  el.classList.toggle('active');
+  if (selectedDays.has(d)) selectedDays.delete(d); else selectedDays.add(d);
+}
+function toggleTime(t, el) {
+  el.classList.toggle('on');
+  if (selectedTimes.has(t)) selectedTimes.delete(t); else selectedTimes.add(t);
+}
+
+async function saveSchedule() {
+  if (!currentUser || !currentUser.is_tutor) return toast('Сначала стань тьютором!');
+  const res  = await fetch('/api/schedule/save', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ days: [...selectedDays], times: [...selectedTimes] })
+  });
+  const data = await res.json();
+  if (data.error) return toast(data.error);
+  toast('Расписание сохранено! ✅');
+}
+
+async function becomeTutor() {
+  const res = await fetch('/api/become_tutor', { method:'POST' });
+  const data = await res.json();
+  if (data.error) return toast(data.error);
+  currentUser.is_tutor = 1;
+  renderProfile();
+  toast('Теперь ты тьютор! 🎓');
+}
+
+async function renderMyBookings() {
+  const res  = await fetch('/api/my_bookings');
+  const data = await res.json();
+  const el   = document.getElementById('myBookings');
+  let html   = '';
+
+  if (data.as_student.length) {
+    html += '<div style="margin-bottom:20px"><div style="color:var(--muted);font-size:.85rem;margin-bottom:10px">📚 Я записан к:</div>';
+    html += '<table class="sched-table"><thead><tr><th>День</th><th>Время</th><th>Тьютор</th><th>Предмет</th></tr></thead><tbody>';
+    data.as_student.forEach(b => {
+      html += `<tr><td>${b.day}</td><td>${b.time}</td><td>${b.tutor_name} ${b.tutor_surname}</td><td>${b.subject}</td></tr>`;
+    });
+    html += '</tbody></table></div>';
+  }
+  if (data.as_tutor.length) {
+    html += '<div><div style="color:var(--muted);font-size:.85rem;margin-bottom:10px">🎓 Ко мне записаны:</div>';
+    html += '<table class="sched-table"><thead><tr><th>День</th><th>Время</th><th>Ученик</th><th>Предмет</th></tr></thead><tbody>';
+    data.as_tutor.forEach(b => {
+      html += `<tr><td>${b.day}</td><td>${b.time}</td><td>${b.student_name} ${b.student_surname}</td><td>${b.subject}</td></tr>`;
+    });
+    html += '</tbody></table></div>';
+  }
+  if (!html) html = '<p style="color:var(--muted)">Нет записей</p>';
+  el.innerHTML = html;
+}
+
+// ── TOAST ──
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+init();
+</script>
+</body>
+</html>
